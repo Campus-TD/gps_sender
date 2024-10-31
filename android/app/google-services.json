@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "1006012680564",
+    "firebase_url": "https://anieitaller-default-rtdb.firebaseio.com",
+    "project_id": "anieitaller",
+    "storage_bucket": "anieitaller.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1006012680564:android:9f350334dea01fcb02c421",
+        "android_client_info": {
+          "package_name": "com.example.enviadorgps"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARSW8oEl5b8tnZW0x_HRLeo2sUik2Mw5s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1006012680564:android:dded618b436ac23f02c421",
+        "android_client_info": {
+          "package_name": "com.example.talleruno"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARSW8oEl5b8tnZW0x_HRLeo2sUik2Mw5s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

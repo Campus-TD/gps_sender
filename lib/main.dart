@@ -1,6 +1,17 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+
+import 'firebase_options.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -38,6 +49,53 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    return await Geolocator.getCurrentPosition();
+  }
+
+  Stream<Position> _determinePositionStream() {
+    final controller = StreamController<Position>();
+
+    // Crea un temporizador que se active cada 5 segundos y emita la posición
+    Timer.periodic(const Duration(seconds: 5), (timer) async {
+      try {
+        Position position = await Geolocator.getCurrentPosition();
+        controller.add(position);
+        FirebaseDatabase database = FirebaseDatabase.instance;
+        DatabaseReference ref = database.ref('camiones/123');
+        ref.child('location').set({
+          'latitude': position.latitude,
+          'longitude': position.longitude,
+        });
+      } catch (e) {
+        controller.addError(e);
+      }
+    });
+
+    return controller.stream;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,21 +104,25 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        child: StreamBuilder(
+          stream: _determinePositionStream(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+
+            if (!snapshot.hasData) {
+              return const CircularProgressIndicator();
+            }
+
+            return Text('Location: ${snapshot.data}');
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () {
+          _determinePosition().then((value) => print(value));
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
