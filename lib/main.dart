@@ -41,13 +41,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  late StreamController<Position> controller;
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
@@ -74,8 +68,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return await Geolocator.getCurrentPosition();
   }
 
+  @override
+  void dispose() {
+    controller.close();
+    super.dispose();
+  }
+
   Stream<Position> _determinePositionStream() {
-    final controller = StreamController<Position>();
+    controller = StreamController<Position>();
 
     // Crea un temporizador que se active cada 5 segundos y emita la posición
     Timer.periodic(const Duration(seconds: 5), (timer) async {
